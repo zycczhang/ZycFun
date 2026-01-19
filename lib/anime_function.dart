@@ -351,7 +351,14 @@ class AnimeApiService {
               ));
             }
           }
+
+          //播放线路过滤
+          if(sourceNames[i] =="动漫专线"){
+            sourceNames[i]="这个很卡";
+          }
+
           playSources.add(PlaySource(sourceName: sourceNames[i], episodes: episodes));
+
         }
         return AnimeDetail(
           title: title,
@@ -419,8 +426,8 @@ class AnimeApiService {
       // 方案 2: 如果 HTTP 请求中无法提取到url，启动无头浏览器方案 (模拟浏览器渲染)
 
       //动漫专线这个线路，http的响应中没有视频的url地址，只能用无头浏览器把网页跑着再提取视频地址
+      //这个方法有点慢，但好像本来他的接口就慢，用浏览器播放这个线路的视频，也要等好一会才出来
 
-      //但是这个方法太慢了啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
       print("HTTP模式未找到链接，启动 WebView 渲染模式 (较慢，请稍候)...");
       return await HeadlessWeb.fetchVideoUrl(playPageUrl);
 
