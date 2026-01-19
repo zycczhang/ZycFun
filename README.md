@@ -9,15 +9,14 @@
 ## ✨ 主要功能
 
 *   **📺 TV 专属交互**：全套 UI 适配遥控器焦点移动（D-Pad Navigation），操作逻辑符合大屏习惯。
-    <img src="assets/p1.png" alt="示例" width="300" height="200" style="border:1px solid #ccc; display: block; margin: 0 auto;">
+    ![示例](assets/p1.png)
 
 *   **🎞️ 沉浸式播放器**：
     *   支持全屏/窗口模式切换。
     *   支持遥控器左右键快进/快退（带防抖优化）。
     *   实时显示缓冲速度（网速监测）。
     *   自动记录播放进度，下次进入自动跳转（断点续播）。
-    
-    <img src="assets/p2.png" alt="示例" width="300" height="200" style="border:1px solid #ccc; display: block; margin: 0 auto;">
+    ![示例](assets/p2.png)
 *   **📡 内置 Web 控制台**：
     *   手机/电脑浏览器访问 TV IP 即可控制。
     *   远程投送播放地址。
