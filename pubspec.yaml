@@ -43,6 +43,7 @@ dependencies:
   shelf_router: ^1.1.4
   network_info_plus: ^6.1.0 # 用于获取本机IP显示给用户
   shelf_cors_headers: ^0.1.5
+  flutter_inappwebview: ^6.1.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

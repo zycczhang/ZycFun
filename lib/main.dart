@@ -4,6 +4,7 @@ import 'home_page.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'anime_function.dart';
 import 'web_server_service.dart';
+import 'package:ZYCFun/HeadlessWeb.dart';
 
 void main() async {
   // 1. 拦截 Print 的关键代码
@@ -15,6 +16,9 @@ void main() async {
       await WakelockPlus.enable();
       await AnimeApiService.init();
       await WebServerService.startServer();
+
+      //无头浏览器
+      HeadlessWeb.init();
 
       runApp(const MyApp());
     },

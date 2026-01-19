@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'package:shared_preferences/shared_preferences.dart';
-
-
+import 'package:html/dom.dart';
+import 'dart:async';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:ZYCFun/HeadlessWeb.dart';
 // --- 新增：线路模型 ---
 class RouteItem {
   final String name;
@@ -370,52 +372,64 @@ class AnimeApiService {
   // 3. 获取视频真实播放地址
   static Future<String> getRealVideoUrl(String playPageUrl) async {
     try {
-      print("正在请求视频页面: $playPageUrl");
-
+      // 步骤 1: 尝试使用轻量级的 http 请求 (速度快)
+      print("正在请求视频页面(HTTP模式): $playPageUrl");
       final response = await http.get(
         Uri.parse(playPageUrl),
         headers: _getHeaders(referer: playPageUrl),
       );
-
-      if (response.statusCode != 200) {
-        print("请求失败，状态码: ${response.statusCode}");
-        return "";
-      }
-
-      String html = response.body;
-      RegExp regExp = RegExp(
-        r'var\s+player_aaaa\s*=\s*(\{.*?\});',
-        dotAll: true,
-      );
-
-      Match? match = regExp.firstMatch(html);
-
-      if (match != null) {
-        String jsonStr = match.group(1)!;
-        try {
-          Map<String, dynamic> data = jsonDecode(jsonStr);
-          String videoUrl = data['url'] ?? "";
-
-          if (videoUrl.isNotEmpty) {
-            videoUrl = videoUrl.replaceAll(r'\/', '/');
-            print("提取成功: $videoUrl");
-            return videoUrl;
-          }
-        } catch (e) {
-          RegExp urlReg = RegExp(r'"url"\s*:\s*"([^"]+)"');
-          Match? urlMatch = urlReg.firstMatch(jsonStr);
-          if (urlMatch != null) {
-            return urlMatch.group(1)!.replaceAll(r'\/', '/');
+      if (response.statusCode == 200) {
+        String html = response.body;
+        // 1.1 尝试从静态 HTML 中直接提取 player_aaaa JS 对象
+        RegExp regExp = RegExp(r'var\s+player_aaaa\s*=\s*(\{.*?\});', dotAll: true);
+        Match? match = regExp.firstMatch(html);
+        if (match != null) {
+          String jsonStr = match.group(1)!;
+          try {
+            Map<String, dynamic> data = jsonDecode(jsonStr);
+            String url = data['url'] ?? "";
+            if (url.startsWith('http')) {
+              print("HTTP模式提取成功 (JSON): $url");
+              return url.replaceAll(r'\/', '/');
+            }
+          } catch (e) {
+            // JSON解析失败，尝试正则提取
+            RegExp urlReg = RegExp(r'url"\s*:\s*"([^"]+)"');
+            Match? urlMatch = urlReg.firstMatch(jsonStr);
+            if (urlMatch != null && urlMatch.group(1)!.startsWith('http')) {
+              print("HTTP模式提取成功 (正则): ${urlMatch.group(1)}");
+              return urlMatch.group(1)!.replaceAll(r'\/', '/');
+            }
           }
         }
-      } else {
-        print("未在页面中找到 player_aaaa 对象");
+
+        // 1.2 尝试从静态 HTML 中直接匹配 <video> 标签 (针对服务端已渲染的情况)
+        // 修正后的正则：使用双引号包裹，内部匹配单引号或双引号
+        RegExp videoTagReg = RegExp(r"<video[^>]+src\s*=\s*['\x22]([^'\x22]+)['\x22]", caseSensitive: false);
+        Match? videoMatch = videoTagReg.firstMatch(html);
+        if (videoMatch != null) {
+          String tempUrl = videoMatch.group(1)!;
+          if (tempUrl.startsWith('http')) {
+            print("HTTP模式提取成功 (Video标签): $tempUrl");
+            return tempUrl;
+          }
+        }
       }
+
+      // 方案 2: 如果 HTTP 请求中无法提取到url，启动无头浏览器方案 (模拟浏览器渲染)
+
+      //动漫专线这个线路，http的响应中没有视频的url地址，只能用无头浏览器把网页跑着再提取视频地址
+
+      //但是这个方法太慢了啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
+      print("HTTP模式未找到链接，启动 WebView 渲染模式 (较慢，请稍候)...");
+      return await HeadlessWeb.fetchVideoUrl(playPageUrl);
+
     } catch (e) {
       print("提取过程发生异常: $e");
     }
     return "";
   }
+
 
   // 4. 搜索功能
   static Future<SearchResult> searchAnime(String keyword, {int page = 1}) async {
