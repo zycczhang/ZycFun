@@ -1,6 +1,8 @@
 # ZycFun TV - Android TV/投影仪第三方客户端 (Flutter)
 
-#  omofun跑路，项目重构
+#  omofun跑路
+
+#  项目新地址：[ZZZFun](https://github.com/zycczhang/ZZZFun)
 #  项目新地址：[ZZZFun](https://github.com/zycczhang/ZZZFun)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.0%2B-blue.svg)](https://flutter.dev)
